@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-
+from models.hotel import HotelModel
 
 hoteis = [
     
@@ -21,6 +21,7 @@ hoteis = [
      'diaria': 320.20,
      'cidade': 'São Paulo'}
 ]
+
 
 class Hoteis(Resource):  # Aqui estou fazendo o primeiro recurso da api
     def get(self):
@@ -50,8 +51,10 @@ class Hotel(Resource):
     
     def post(self, hotel_id):
         dados = Hotel.argumentos.parse_args()
+        hotel_objeto = HotelModel(hotel_id, **dados)  # Aqui precisa pegar todos os objetos do HotelModel e para não colocar todos...
+        #...fazemos **dados para completar em vez de ficar escrevendo um por um.
+        novo_hotel = hotel_objeto.json()
         
-        novo_hotel = {'hotel_id': hotel_id, **dados }
         
         hoteis.append(novo_hotel)
         return novo_hotel, 200  # 200 código de sucesso, que deu certo.
@@ -60,9 +63,8 @@ class Hotel(Resource):
     def put(self, hotel_id):
        
        dados = Hotel.argumentos.parse_args()
-       novo_hotel = {'hotel_id': hotel_id, **dados }  # conceito de kwargs, que vai desempacotar os dados sem precisar colocar...
-           #...todas as chaves e valores, reduzindo muito a linha de código.
-       
+       hotel_objeto = HotelModel(hotel_id, **dados)
+       novo_hotel = hotel_objeto.json()
        hotel = Hotel.find_hotel(hotel_id)
        if hotel:
            hotel.update(novo_hotel)
@@ -70,9 +72,11 @@ class Hotel(Resource):
        hoteis.append(novo_hotel)
        return novo_hotel, 201 # created - criado com sucesso    
            
-       
-       
+        
         
     
     def delete(self, hotel_id):
-        pass
+        global hoteis
+        hoteis = [ hotel for hotel in hoteis if hotel ['hotel_id'] != hotel_id]
+        return {'message': 'Hotel deleted.'}
+    
