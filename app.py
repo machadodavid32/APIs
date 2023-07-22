@@ -5,13 +5,20 @@ from resources.hotel import Hoteis, Hotel
 """ Vamos desenvolver uma api para pesquisar por hoteis, saber localização e preços."""
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco.db' #Aqui define o caminho e o nome do nosso banco no slqalchemy
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Para evitar avisos que atrasam a
 api = Api(app)
 
+@app.before_first_request  # ou seja, antes da primeira requisição.
+def cria_banco():
+    banco.create_all()
     
 api.add_resource(Hoteis, '/hoteis')
 api.add_resource(Hotel, '/hoteis/<string:hotel_id>')
 
 if __name__ == '__main__':  # Aqui é uma configuração padrão do flask
+    from sql_alchemy import banco
+    banco.init_app(app)  # Para ser executado somente no arquivo principal(main = app.py)
     app.run(debug=True)  # Modo debug=True enquanto está em desenvolvimento, após isso ou retirar ou colocar como False
         
 # Abrir anbiente virtual david_api/Scripts/Activate
