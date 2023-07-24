@@ -37,11 +37,7 @@ class Hotel(Resource):
     argumentos.add_argument('diaria')
     argumentos.add_argument('cidade')
     
-    def find_hotel(hotel_id):
-        for hotel in hoteis:
-            if hotel['hotel_id'] == hotel_id:
-                return hotel            
-        return None  
+
     
     def get(self, hotel_id):
         hotel = Hotel.find_hotel(hotel_id)
@@ -51,15 +47,16 @@ class Hotel(Resource):
     
     
     def post(self, hotel_id):
+        if HotelModel.find_hotel(hotel_id):  # evitar que se crie um hotel ja cadastrado.
+            return {"message": "Hotel id '{}' already existis.".format(hotel_id)}, 400
+        
+        
         dados = Hotel.argumentos.parse_args()
-        hotel_objeto = HotelModel(hotel_id, **dados)  # Aqui precisa pegar todos os objetos do HotelModel e para não colocar todos...
+        hotel = HotelModel(hotel_id, **dados)  # Aqui precisa pegar todos os objetos do HotelModel e para não colocar todos...
         #...fazemos **dados para completar em vez de ficar escrevendo um por um.
-        novo_hotel = hotel_objeto.json()
-        
-        
-        hoteis.append(novo_hotel)
-        return novo_hotel, 200  # 200 código de sucesso, que deu certo.
-    
+        hotel.save_hotel()
+        return hotel.json()
+         
     
     def put(self, hotel_id):
        
