@@ -27,6 +27,13 @@ class UserModel(banco.Model):
             return user  # Se existe hotel, retorne hotel
         return None # Se não existe, retorne None
     
+    @classmethod
+    def find_by_login(cls, login):
+        user = cls.query.filter_by(login=login).first() 
+        if user:
+            return user
+        return None
+    
         
     def save_user(self):
         banco.session.add(self)

@@ -1,13 +1,17 @@
 from flask import Flask
 from flask_restful import Api
 from resources.hotel import Hoteis, Hotel
+from resources.usuario import User, UserRegister, UserLogin
+from flask_jwt_extended import JWTManager  # serve para gerenciar toda a parte de autenticação
 
 """ Vamos desenvolver uma api para pesquisar por hoteis, saber localização e preços."""
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco.db' #Aqui define o caminho e o nome do nosso banco no slqalchemy
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Para evitar avisos que atrasam a
+app.config['JWT_SECRET_KEY'] = 'dontTellAnyone' #Configuração necessária para uma garantir a criptografia
 api = Api(app)
+jwt = JWTManager(app)
 
 @app.before_first_request  # ou seja, antes da primeira requisição.
 def cria_banco():
@@ -15,6 +19,10 @@ def cria_banco():
     
 api.add_resource(Hoteis, '/hoteis')
 api.add_resource(Hotel, '/hoteis/<string:hotel_id>')
+api.add_resource(User, '/usuarios/<int:user_id>')
+api.add_resource(UserRegister, '/cadastro')
+api.add_resource(UserLogin, '/login')
+
 
 if __name__ == '__main__':  # Aqui é uma configuração padrão do flask
     from sql_alchemy import banco
