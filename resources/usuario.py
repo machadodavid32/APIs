@@ -2,8 +2,8 @@ from flask_restful import Resource, reqparse
 from models.usuario import UserModel
 from flask_jwt_extended import create_access_token
 from secrets import compare_digest
-
-
+from flask_jwt_extended import jwt_required, get_jwt
+from blacklist import BLACKLIST
 
 
 atributos = reqparse.RequestParser()
@@ -19,7 +19,7 @@ class User(Resource):  # Aqui estou fazendo o primeiro recurso da api
         return {'message': 'User not found'}, 404   # Aqui caso ele não encontre o hotel, vai retornar esta mensagem.    
     
     
-    
+    @jwt_required()
     def delete(self, user_id):
         user = UserModel.find_user(user_id)
         if user:
@@ -42,6 +42,8 @@ class UserRegister(Resource):
         return {"message" : "User created succesfully!"}, 201 # created
     
 class UserLogin(Resource):
+    
+    @classmethod
     def post(cls):
         dados = atributos.parse_args()
         
@@ -53,3 +55,13 @@ class UserLogin(Resource):
         return {'message': 'The username or password is incorrect'}, 401
     
     # aqui instalamos outra biblioteca: pip install Flask-JWT-Extended
+    
+
+class UserLogout(Resource):
+    
+    @jwt_required()
+    def post(self):
+        jwt_id = get_jwt()['jti']  # jti = jtw + Token + Identifier
+        BLACKLIST.add(jwt_id)
+        return {'message': 'Logged out succesfully!'}, 200
+        
